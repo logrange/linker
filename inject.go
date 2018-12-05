@@ -31,13 +31,16 @@ type (
 	//
 	// 1. Registration phase. Components are added to the injector, or registered
 	// there via Register() function.
+	//
 	// 2. Construct phase. In the phase, the Injector walks over fields
 	// of every registered component and it adds appropriate dependency found in
 	// between other components. The phase is started by Init() call.
+	//
 	// 3. Initialization phase. On the phase the Injector builds components
 	// dependencies graph and initialize each component in an order. Dependant
 	// components must be initialize after their dependencies. This phase is
 	// done in context of Init() call.
+	//
 	// 4. Shutdown phase. On the phase components are de-initialied or being
 	// shutdowned. Components are shutdowned in a reverse of their
 	// initialization order. The phase is performed by Shutdown() call

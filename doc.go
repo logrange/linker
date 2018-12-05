@@ -13,15 +13,46 @@
 // limitations under the License.
 
 /*
+Package linker provides Dependency Injection and Inversion of Control functionality.
+The core component is Injector, which allows to register Components. Component
+is an object, which can have any type, which requires some initialization, or can be used
+for initializing other components. Every component is registered in the Injector
+by the component name or anonymously (empty name). Same object can be registered
+by different names. This could be useful if the object implements different
+interfaces that can be used by different components.
 
+The package contains several interfaces: PostConstructor, Initializer and
+Shutdowner, which could be implemented by components with a purpose to be called
+by Injector on different initialization/de-initialization phases.
 
-Same object could be registered with multiple names
+Init() function of Injector allows to initialize registered components. The
+initialization process supposes that components with 'pointer to struct' type
+or interfaces, which contains a 'pointer to struct' will be initialized. The
+initialization supposes to inject (assign) the struct fields values using other
+registered components. Injector matches them by name or by type. Injector uses
+fail-fast strategy so any error is considered like misconfiguraion and a panic
+happens.
 
-when init, only struct pointers fields are populated, not struct by value
+When all components are initialized, the components, which implement PostConstructor
+interface will be notified via PostConsturct() function call. The order of
+PostConstruct() calls is not defined.
 
-Embedded structs are not supported
+After the construction phase, injector builds dependencies graph with a purpose
+to detect dependency loops and to establish components initialization order.
+If a dependency loop is found, Injector will panic. Components, which implement
+Initializer interface, will be notified in specific order by Init(ctx) function
+call. Less dependant components will be initialized before the components that
+have dependency on the first ones.
 
-cycles are not supported
+Injector is supposed to be called from one go-routine and doesn't support calls
+from multiple go-routines.
+
+Initialization process could take significant time, so context is provided. If
+the context is cancelled or closed it will be detected either by appropriate
+component or by the Injector what will cause of de-intializing already initialized
+components using Shutdown() function call (if provided) in reverse of the
+initialization order. Panic will happen then.
+
 */
 
 package linker

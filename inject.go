@@ -218,14 +218,14 @@ func (i *Injector) Init(ctx context.Context) {
 			i.panic("Internal error, init order should be positive, but the component has wrong one " + c.String())
 		}
 		iList = append(iList, c)
-		c.postConstruct()
+		c.postConstruct(i.log)
 	}
 
 	// sort components and call for Init()
 	sort.Slice(iList, func(i int, j int) bool { return iList[i].getInitOrder() < iList[j].getInitOrder() })
 	i.iComps = make([]*component, 0, len(iList))
 	for idx, c := range iList {
-		err := c.init(ctx)
+		err := c.init(ctx, i.log)
 		if err != nil {
 			em := fmt.Sprintf("An error from Init of %s which was #%d in the order, err=%s. Will roll things back and panicing", c.tp, idx, err)
 			i.Shutdown()
@@ -244,7 +244,7 @@ func (i *Injector) Shutdown() {
 	i.log.Info("Shutdown(): ", len(i.iComps), " components")
 	for idx := len(i.iComps) - 1; idx >= 0; idx-- {
 		c := i.iComps[idx]
-		err := c.shutdown()
+		err := c.shutdown(i.log)
 		if err != nil {
 			i.log.Info("An error while  shutdown. err=", err)
 		}
@@ -368,13 +368,14 @@ func isStructPtr(t reflect.Type) bool {
 	return t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct
 }
 
-func (c *component) postConstruct() {
+func (c *component) postConstruct(log Logger) {
 	if pc, ok := c.value.(PostConstructor); ok {
+		log.Info("PostConstruct() for ", c.tp, " priority=", c.initOrder)
 		pc.PostConstruct()
 	}
 }
 
-func (c *component) init(ctx context.Context) (err error) {
+func (c *component) init(ctx context.Context, log Logger) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -383,13 +384,14 @@ func (c *component) init(ctx context.Context) (err error) {
 	}()
 
 	if i, ok := c.value.(Initializer); ok {
+		log.Info("Init() for ", c.tp, " priority=", c.initOrder)
 		err = i.Init(ctx)
 	}
 
 	return
 }
 
-func (c *component) shutdown() (err error) {
+func (c *component) shutdown(log Logger) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -398,6 +400,7 @@ func (c *component) shutdown() (err error) {
 	}()
 
 	if s, ok := c.value.(Shutdowner); ok {
+		log.Info("Shutdown() for ", c.tp, " priority=", c.initOrder)
 		s.Shutdown()
 	}
 

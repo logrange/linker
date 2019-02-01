@@ -70,8 +70,8 @@ So annotated fields can be assigned using different rules:
 // FieldType, panic will happen
 Field FieldType `inject:"compName"`
 
-// Field will be assigned by component with any name "compName", which could be 
-// assigned to the FieldType. If no such component or many match to the type, 
+// Field will be assigned by component with any name (indicated as ""), which could be 
+// assigned to the FieldType. If no such component or many matches to the type, 
 // panic will happen.
 Field FieldType `inject:""`
 

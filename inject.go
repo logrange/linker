@@ -379,7 +379,7 @@ func (c *component) init(ctx context.Context, log Logger) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			err = fmt.Errorf("Panic in Init() of %s", c.tp)
+			err = fmt.Errorf("Panic in Init() of %s recover=%v", c.tp, r)
 		}
 	}()
 

@@ -9,7 +9,7 @@ Linker is Dependency Injection and Inversion of Control package.
  - Dependency injection
  - Components initialization prioritization
  - Initialization and shutdown control
-t
+tt
 ```golang
 
 import (

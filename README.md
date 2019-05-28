@@ -13,7 +13,7 @@ Linker is Dependency Injection and Inversion of Control package.
 ```golang
 
 import (
-     "github.com/lograng/linker"
+     "github.com/logrange/linker"
 )
 
 type DatabaseAccessService interface {

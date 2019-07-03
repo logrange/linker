@@ -2,16 +2,8 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/logrange/linker)](https://goreportcard.com/report/github.com/logrange/linker) [![Build Status](https://travis-ci.org/logrange/linker.svg?branch=master)](https://travis-ci.org/logrange/linker) [![codecov](https://codecov.io/gh/logrange/linker/branch/master/graph/badge.svg)](https://codecov.io/gh/logrange/linker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/logrange/linker/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/logrange/linker?status.png)](https://godoc.org/github.com/logrange/linker)
 
-Linker is Dependency Injection and Inversion of Control package. 
+Linker is Dependency Injection and Inversion of Control package. It supports the following features:
 
-**Linker highlights:**
- - Components registry
- - Dependency injection
- - Components initialization prioritization
- - Initialization and shutdown control
-
-## Introduction
-Linker is small Golang library which supports the following features:
 - Components registry
 - Automatic dependency injection of the registered components
 - Components lifecycle support via `PostConstructor`, `Initializer` and `Shutdowner` interfaces implementations

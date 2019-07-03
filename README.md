@@ -1,6 +1,6 @@
 # Linker
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/logrange/linker)](https://goreportcard.com/report/github.com/logrange/linker) [![Build Status](https://travis-ci.org/logrange/linker.svg?branch=master)](https://travis-ci.org/logrange/linker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/logrange/linker/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/logrange/linker?status.png)](https://godoc.org/github.com/logrange/linker)
+[![Go Report Card](https://goreportcard.com/badge/github.com/logrange/linker)](https://goreportcard.com/report/github.com/logrange/linker) [![Build Status](https://travis-ci.org/logrange/linker.svg?branch=master)](https://travis-ci.org/logrange/linker) [![codecov](https://codecov.io/gh/logrange/linker/branch/master/graph/badge.svg)](https://codecov.io/gh/logrange/linker) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/logrange/linker/blob/master/LICENSE) [![GoDoc](https://godoc.org/github.com/logrange/linker?status.png)](https://godoc.org/github.com/logrange/linker)
 
 Linker is Dependency Injection and Inversion of Control package. 
 

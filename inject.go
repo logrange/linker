@@ -430,7 +430,7 @@ func (c *component) setInitOrder(blkList map[*component]bool) int {
 
 	o := 1
 	blkList[c] = true
-	for c1, _ := range c.deps {
+	for c1 := range c.deps {
 		if _, ok := blkList[c1]; ok {
 			panic(fmt.Sprintf("Found a loop in the object graph dependencies. Component %s has a reference to %s, which alrady refers to the first one directly or indirectly",
 				c, c1))

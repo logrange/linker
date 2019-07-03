@@ -52,7 +52,5 @@ the context is cancelled or closed it will be detected either by appropriate
 component or by the Injector what will cause of de-intializing already initialized
 components using Shutdown() function call (if provided) in reverse of the
 initialization order. Panic will happen then.
-
 */
-
 package linker

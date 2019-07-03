@@ -4,11 +4,25 @@
 
 Linker is Dependency Injection and Inversion of Control package. 
 
-**Linker's highlights:**
+**Linker highlights:**
  - Components registry
  - Dependency injection
  - Components initialization prioritization
  - Initialization and shutdown control
+
+## Introduction
+Linker is small Golang library which supports the following features:
+- Components registry
+- Automatic dependency injection of the registered components
+- Components lifecycle support via `PostConstructor`, `Initializer` and `Shutdowner` interfaces implementations
+- Post-injection notification
+- Automatic ordering of components initialization 
+- Circular dependency detection
+- Components shutdowning
+
+Please refer to [this blogpost](https://www.logrange.io/blog/linker.html) for some details.
+
+Linker is used by [Logrange](https://github.com/logrange/logrange), please take a look how it is used [there](https://github.com/logrange/logrange/blob/be1cc8dc0ae8fa9154eec91bea33cd2105509e11/server/server.go#L53).
 
 ```golang
 

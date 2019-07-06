@@ -134,8 +134,8 @@ func TestOptional(t *testing.T) {
 }
 
 type WrongDedault struct {
-	FloatVal   float32 `inject: "wrongDefault,optional:1..23"`
-	FloatOkVal float32 `inject: "test,optional:1.23"`
+	FloatVal   float32 `inject:"wrongDefault,optional:1..23"`
+	FloatOkVal float32 `inject:"test,optional:1.23"`
 }
 
 func TestOptionalPanics(t *testing.T) {
@@ -166,7 +166,7 @@ func TestOptionalFloatOk(t *testing.T) {
 }
 
 type StringStruct struct {
-	StringVal string `inject: "some,optional:abc"`
+	StringVal string `inject:"some,optional:abc"`
 }
 
 func TestStringOptional(t *testing.T) {
@@ -237,7 +237,7 @@ type CompCycle2 struct {
 	init     int
 	shutdwn  int
 	err      error
-	CC       *CompCycle3 `inject: ""`
+	CC       *CompCycle3 `inject:""`
 }
 
 type CompCycle3 struct {
@@ -376,7 +376,9 @@ func TestInitCycleClosedCtx(t *testing.T) {
 	)
 
 	start := time.Now()
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Millisecond)
+	defer cancel()
+
 	cc1.waitCtx = true
 	catchPanic(t, "", func() { inj.Init(ctx) })
 	if time.Now().Sub(start) < 5*time.Millisecond {

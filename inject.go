@@ -255,6 +255,75 @@ func (i *Injector) Shutdown() {
 	i.log.Info("Shutdown(): done.")
 }
 
+// assignOrPanic assigns value for the field with index fi according to the tagInfo provided.
+// The function panics on any error related to the assignment.
+func (i *Injector) assignOrPanic(c *component, fi int, tagInfo parseRes) {
+	f := c.val.Elem().Field(fi)
+	fType := f.Type()
+	fName := c.tp.Elem().Field(fi).Name
+
+	compName := tagInfo.val
+	if compName != "" {
+		c1, ok := i.named[compName]
+		if !ok {
+			if tagInfo.optional {
+				err := setFieldValueByString(f, tagInfo.defVal)
+				if err != nil {
+					i.panic(fmt.Sprintf("Could not assign the default value=\"%s\" to the field %s (with type %s) in the type %s.",
+						tagInfo.defVal, fName, fType, c.tp))
+				}
+
+				i.log.Info("Field #", fi, "(", fName, "): the component name ", compName, ", is not found, but the field population is optional. Skipping the value. ")
+				return
+			}
+			i.panic(fmt.Sprintf("Could not set field %s in type %s, cause no component with such name(%s) was found.", fName, c.tp, compName))
+		}
+
+		if !c1.tp.AssignableTo(fType) {
+			i.panic(fmt.Sprintf("Component named %s of type %s is not assignable to field %s (with type %s) in %s.",
+				compName, c1.tp, fName, fType, c.tp))
+		}
+
+		f.Set(c1.val)
+		c.addDep(c1)
+		i.log.Debug("Field #", fi, "(", fName, "): Populating the field in type ", c.tp, " by the component ", c1.tp)
+		return
+	}
+
+	// search for a assignable type to the field
+	var found *component
+	for _, uc := range i.comps {
+		if uc.tp.AssignableTo(fType) {
+			if found != nil {
+				i.panic(fmt.Sprintf("Ambiguous component assignment for the field %s with type %s in the type %s. Both unnamed components %s and %s, matched to the field.",
+					fName, fType, c.tp, found.tp, uc.tp))
+			}
+			found = uc
+		}
+	}
+
+	if found != nil {
+		f.Set(found.val)
+		c.addDep(found)
+		i.log.Debug("Field #", fi, "(", fName, "): Populating the field in type ", c.tp, " by component ", found.tp)
+		return
+	}
+
+	// If nothing is found, apply default value if it's possible.
+	if tagInfo.optional {
+		err := setFieldValueByString(f, tagInfo.defVal)
+		if err != nil {
+			i.panic(fmt.Sprintf("Could not assign the default value=\"%s\" to the field %s (with type %s) in the type %s.",
+				tagInfo.defVal, fName, fType, c.tp))
+		}
+
+		i.log.Info("Field #", fi, "(", fName, "): the component name ", compName, ", is not found, but the field population is optional. Skipping the value. ")
+		return
+	}
+
+	i.panic(fmt.Sprintf("Could not find a component to initialize field %s (with type %s) in the type %s", fName, fType, c.tp))
+}
+
 func (i *Injector) initStructPtr(c *component) {
 	if !isStructPtr(c.tp) {
 		i.log.Debug("Skipping component with type ", c.tp, " cause it is not a pointer to a struct")
@@ -283,65 +352,7 @@ func (i *Injector) initStructPtr(c *component) {
 			i.panic(fmt.Sprintf("Could not set field %s valued of %s, cause it is unexported.", fName, c.tp))
 		}
 
-		compName := tagInfo.val
-		if compName != "" {
-			c1, ok := i.named[compName]
-			if !ok {
-				if tagInfo.optional {
-					err := setFieldValueByString(f, tagInfo.defVal)
-					if err != nil {
-						i.panic(fmt.Sprintf("Could not assign the default value=\"%s\" to the field %s (with type %s) in the type %s.",
-							tagInfo.defVal, fName, fType, c.tp))
-					}
-
-					i.log.Info("Field #", fi, "(", fName, "): the component name ", compName, ", is not found, but the field population is optional. Skipping the value. ")
-					continue
-				}
-				i.panic(fmt.Sprintf("Could not set field %s in type %s, cause no component with such name(%s) was found.", fName, c.tp, compName))
-			}
-
-			if !c1.tp.AssignableTo(fType) {
-				i.panic(fmt.Sprintf("Component named %s of type %s is not assignable to field %s (with type %s) in %s.",
-					compName, c1.tp, fName, fType, c.tp))
-			}
-
-			f.Set(c1.val)
-			c.addDep(c1)
-			i.log.Debug("Field #", fi, "(", fName, "): Populating the field in type ", c.tp, " by the component ", c1.tp)
-			continue
-		}
-
-		// search for a assignable type to the field
-		var found *component
-		for _, uc := range i.comps {
-			if uc.tp.AssignableTo(fType) {
-				if found != nil {
-					i.panic(fmt.Sprintf("Ambiguous component assignment for the field %s with type %s in the type %s. Both unnamed components %s and %s, matched to the field.",
-						fName, fType, c.tp, found.tp, uc.tp))
-				}
-				found = uc
-			}
-		}
-
-		if found != nil {
-			f.Set(found.val)
-			c.addDep(found)
-			i.log.Debug("Field #", fi, "(", fName, "): Populating the field in type ", c.tp, " by component ", found.tp)
-			continue
-		}
-
-		if tagInfo.optional {
-			err := setFieldValueByString(f, tagInfo.defVal)
-			if err != nil {
-				i.panic(fmt.Sprintf("Could not assign the default value=\"%s\" to the field %s (with type %s) in the type %s.",
-					tagInfo.defVal, fName, fType, c.tp))
-			}
-
-			i.log.Info("Field #", fi, "(", fName, "): the component name ", compName, ", is not found, but the field population is optional. Skipping the value. ")
-			continue
-		}
-
-		i.panic(fmt.Sprintf("Could not find a component to initialize field %s (with type %s) in the type %s", fName, fType, c.tp))
+		i.assignOrPanic(c, fi, tagInfo)
 	}
 }
 

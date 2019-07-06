@@ -1,12 +1,26 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
+.DS_Store
+
+.classpath
+.metadata
+.project
+.settings
+.idea/
+
+target/
+bin/
+binaries/
+
+*.iml
+*.ipr
+*.iws
+
+*.py[co]
+*.egg
+*.egg-info
+
+*.o
+*.obj
 *.so
 *.dylib
-
-# Test binary, build with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+*.test

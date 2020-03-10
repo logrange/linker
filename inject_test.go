@@ -299,6 +299,35 @@ func (cc *CompCycle3) Shutdown() {
 	*cc.refCnt--
 }
 
+func TestRegisterAndInitOnce(t *testing.T) {
+	inj := New()
+	inj.SetLogger(stdLogger{})
+
+	c := &CompCycle3{refCnt: new(int)}
+	inj.Register(Component{Name: "", Value: c},
+		Component{Name: "infVal", Value: c},
+		Component{Name: "val2", Value: c},
+	)
+
+	if len(inj.comps) != 1 {
+		t.Fatal("only one instance should be registered")
+	}
+
+	if len(inj.named) != 2 {
+		t.Fatal("only two named instances should be registered")
+	}
+
+	inj.Init(context.Background())
+	if *c.refCnt != 1 {
+		t.Fatal("only once must be initialized")
+	}
+
+	inj.Shutdown()
+	if *c.refCnt != 0 {
+		t.Fatal("must be de-initialized")
+	}
+}
+
 func TestCompCycle(t *testing.T) {
 	i := 1
 	cc1 := &CompCycle1{refCnt: &i}
@@ -395,6 +424,29 @@ func TestInitCycleClosedCtx(t *testing.T) {
 
 	if cc3.pstConst != 1 || cc2.pstConst != 1 || cc1.pstConst != 1 {
 		t.Fatal("Wrong PostConstruct order ", cc1, cc2, cc3)
+	}
+}
+
+type Func func()
+
+type WithFunc struct {
+	Func Func `inject:""`
+}
+
+func TestFuncInject(t *testing.T) {
+	inj := New()
+	inj.SetLogger(stdLogger{})
+
+	wf := &WithFunc{}
+	a := 0
+	inj.Register(
+		Component{Name: "", Value: wf},
+		Component{Name: "", Value: func() {a++}},
+	)
+	inj.Init(context.Background())
+	wf.Func()
+	if a != 1 {
+		t.Fatal("function must be injected no problem")
 	}
 }
 

@@ -175,11 +175,12 @@ func (i *Injector) SetLogger(log Logger) {
 // Init().
 func (i *Injector) Register(comps ...Component) {
 	for _, c := range comps {
-		pc, ok := i.comps[c.Value]
+		val := reflect.ValueOf(c.Value)
+		pc, ok := i.comps[val]
 		if !ok {
 			// well, we don't have the wrapper yet, creating a new one
 			pc = new(component)
-			i.comps[c.Value] = pc
+			i.comps[val] = pc
 			pc.value = c.Value
 			pc.tp = reflect.TypeOf(c.Value)
 			pc.val = reflect.ValueOf(c.Value)

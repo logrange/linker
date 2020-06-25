@@ -450,6 +450,26 @@ func TestFuncInject(t *testing.T) {
 	}
 }
 
+type WithMap struct {
+	Map map[string]interface{} `inject:""`
+}
+
+func TestMapInject(t *testing.T) {
+	inj := New()
+	inj.SetLogger(stdLogger{})
+
+	wm := &WithMap{}
+	inj.Register(
+		Component{Name: "", Value: wm},
+		Component{Name: "", Value: map[string]interface{}{"aaa": "bbbb"}},
+	)
+	inj.Init(context.Background())
+	res := wm.Map["aaa"]
+	if res != "bbbb" {
+		t.Fatal("map must be injected with no problem")
+	}
+}
+
 func catchPanic(t *testing.T, pfx string, f func()) {
 	defer func() {
 		r := recover()
